@@ -1,7 +1,6 @@
 import './globals.css'
 import ThemedBackground from '../../components/ThemedBackground'
 import { ThemeProvider } from '../../components/ThemeContext'
-import LayoutClient from '../../components/LayoutClient'
 import SpaceAudioVisualizer from '../../components/SpaceAudioVisualizer'
 
 export const metadata = {
@@ -16,9 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ThemedBackground />
           <SpaceAudioVisualizer />
-          <LayoutClient>
             {children}
-          </LayoutClient>
         </ThemeProvider>
       </body>
     </html>

@@ -9,7 +9,6 @@ import Parallax3DPixel from '../../components/Parallax3DPixel'
 import localFont from 'next/font/local'
 import ProjectCard from '../../components/ProjectCard'
 import SequentialFadeIn from '../../components/SequentialFadeIn'
-import { useNavbar } from '../../components/LayoutClient'
 import { useTheme } from '../../components/ThemeContext'
 import { useEffect } from 'react'
 
@@ -41,13 +40,12 @@ const PLACEHOLDER_LAYERS = [
 ]
 
 export default function Home(){
-  const { setShowNavbar } = useNavbar()
   const { setScrollY } = useTheme()
 
   // Show navbar after mount
-  useEffect(() => {
-    setShowNavbar(true)
-  }, [setShowNavbar])
+  // useEffect(() => {
+  //   setShowNavbar(true)
+  // }, [setShowNavbar])
 
   // Track scroll position and update theme context for space background parallax
   useEffect(() => {
