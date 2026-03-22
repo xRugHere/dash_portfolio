@@ -28,7 +28,7 @@ export async function GET() {
     }
   );
 
-  if (nowPlayingRes.status === 204 || nowPlayingRes.status > 400) {
+  if (nowPlayingRes.status === 204 || nowPlayingRes.status === 401 || nowPlayingRes.status === 403) {
     return Response.json({ isPlaying: false });
   }
 
