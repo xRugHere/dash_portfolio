@@ -10,6 +10,7 @@ import localFont from 'next/font/local'
 import ProjectCard from '../../components/ProjectCard'
 import SequentialFadeIn from '../../components/SequentialFadeIn'
 import { useTheme } from '../../components/ThemeContext'
+import DashboardSection from '../../components/DashboardSection'
 import { useEffect } from 'react'
 
 const lunarLocal = localFont({
@@ -69,6 +70,10 @@ export default function Home(){
     <>
       {/* FUTURISTIC SECTION - Top of page (no top transition since it's at the start) */}
         <div className="pt-24 pb-16">
+          <ScrollFadeIn delay={200}>
+            <DashboardSection />
+          </ScrollFadeIn>
+
           <ScrollFadeIn delay={500}>
             <IntroCard 
               imageSrc="/images/StudioCard2.png"
