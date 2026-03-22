@@ -1,4 +1,4 @@
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 const GITHUB_USERNAME = "xRugHere"; // your GitHub username
 
@@ -39,8 +39,13 @@ export async function GET() {
     next: { revalidate: 3600 },
   });
 
-  const { data } = await res.json();
-  const user = data.user;
+  const json = await res.json();
+
+  if (!json.data?.user) {
+    return Response.json({ error: "GitHub API error" }, { status: 500 });
+  }
+
+  const user = json.data.user;
 
   const langMap: Record<string, number> = {};
   for (const repo of user.repositories.nodes) {
