@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: "https://dash-portfolio-ten.vercel.app/spotify/callback",
+      redirect_uri: "https://dash-portfolio-ten.vercel.app/api/spotify/callback",
     }),
   });
 

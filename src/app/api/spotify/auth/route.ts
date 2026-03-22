@@ -4,7 +4,7 @@ export async function GET() {
     response_type: "code",
     client_id: process.env.SPOTIFY_CLIENT_ID!,
     scope,
-    redirect_uri: "https://dash-portfolio-ten.vercel.app/spotify/callback",
+    redirect_uri: "https://dash-portfolio-ten.vercel.app/api/spotify/callback",
   });
 
   return Response.redirect(
