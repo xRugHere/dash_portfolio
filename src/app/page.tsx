@@ -5,7 +5,7 @@ import SocialLinks from '../../components/SocialLinks'
 import PixelArtDisplay from '../../components/PixelArtDisplay'
 import IntroCard from '../../components/IntroCard'
 import ScrollFadeIn from '../../components/ScrollFadeIn'
-import Parallax3DPixel from '../../components/Parallax3DPixel'
+import Parallax3DPixel, { PortalLayer } from '../../components/Parallax3DPixel'
 import localFont from 'next/font/local'
 import ProjectCard from '../../components/ProjectCard'
 import SequentialFadeIn from '../../components/SequentialFadeIn'
@@ -23,21 +23,10 @@ const lunarLocal = localFont({
   ],
 })
 
-function makePlaceholderLayer(color: string, size: number, label: string): string {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-    <rect width="${size}" height="${size}" fill="${color}"/>
-    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
-          font-family="monospace" font-size="14" fill="white">${label}</text>
-  </svg>`
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
-}
-
-const PLACEHOLDER_LAYERS = [
-  { src: makePlaceholderLayer('#1e293b', 200, 'Back'), alt: 'Back layer' },
-  { src: makePlaceholderLayer('#334155', 200, 'Mid-Back'), alt: 'Mid-back layer' },
-  { src: makePlaceholderLayer('#475569', 200, 'Middle'), alt: 'Middle layer' },
-  { src: makePlaceholderLayer('#64748b', 200, 'Mid-Front'), alt: 'Mid-front layer' },
-  { src: makePlaceholderLayer('#94a3b8', 200, 'Front'), alt: 'Front layer' },
+const layers: PortalLayer[] = [
+  { src: '/3d-objects/earthPortal/skyBackground.png', alt: 'Sky',          depth: .5 },  // furthest — moves most
+  { src: '/3d-objects/earthPortal/cloudLayer2.png',   alt: 'Cloud layer 2', depth: 0.3 },
+  { src: '/3d-objects/earthPortal/cloudLayer1.png',   alt: 'Cloud layer 1', depth: 0.1 }, // closest — moves least
 ]
 
 export default function Home(){
@@ -238,12 +227,10 @@ export default function Home(){
           <div className="flex flex-col items-center mt-12">
             <h3 className={`text-xl mb-4 text-center ${lunarLocal.className}`}>3D Pixel Parallax Test</h3>
             <Parallax3DPixel
-              layers={PLACEHOLDER_LAYERS}
-              width={200}
-              height={200}
-              layerGap={6}
-              maxOffsetX={30}
-              maxOffsetY={20}
+              layers={layers}
+              width={400}
+              height={300}
+              onExpanded={() => console.log('Portal expanded!')}
             />
           </div>
         </ScrollFadeIn>

@@ -110,7 +110,7 @@ function SpotifyWidget({ data }: { data: SpotifyData | null }) {
         {data?.isPlaying && (
           <span className="ml-auto flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-green-400/80">live</span>
+            <span className={`text-xs text-green-400/80 ${lunarLocal.className}`}> live</span>
           </span>
         )}
       </div>
@@ -123,16 +123,16 @@ function SpotifyWidget({ data }: { data: SpotifyData | null }) {
           href={data.songUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 group"
+          className={`flex items-center gap-3 group ${lunarLocal.className}`}
         >
           <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-white/10">
             <Image src={data.albumArt} alt={data.title} fill className="object-cover" />
           </div>
           <div className="min-w-0">
-            <p className="text-white text-sm font-medium truncate group-hover:text-green-400 transition-colors">
+            <p className={`text-white text-sm font-medium truncate group-hover:text-green-400 transition-colors`}>
               {data.title}
             </p>
-            <p className="text-white/50 text-xs truncate">{data.artist}</p>
+            <p className={`text-white/50 text-xs truncate`}>{data.artist}</p>
           </div>
         </a>
       ) : (
@@ -143,8 +143,8 @@ function SpotifyWidget({ data }: { data: SpotifyData | null }) {
             </svg>
           </div>
           <div>
-            <p className={`text-white/40 text-sm ${lunarLocal.className}`}>not playing</p>
-            <p className="text-white/25 text-xs">nothing in the queue</p>
+            <p className={`text-white/40 text-sm`}>not playing</p>
+            <p className={`text-white/25 text-xs`}>nothing in the queue</p>
           </div>
         </div>
       )}
