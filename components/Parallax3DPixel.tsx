@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import Image from 'next/image'
+import type { ParticleConfig, LayerObjectDef, ParticleDef } from './ParallaxBackground'
 
 /* ════════════════════════════════════════════════════════════════════════
    Types
@@ -24,7 +25,26 @@ export interface PortalLayer {
 type PortalPhase = 'idle' | 'flattening' | 'expanding' | 'expanded'
 
 export interface ParallaxPortalProps {
-  layers: PortalLayer[]
+  /** Static full-bleed image layers (original behaviour) */
+  layers?: PortalLayer[]
+
+  /* ── Scene content (background-style objects inside the portal) ──── */
+  /** Background colour visible through the portal */
+  bgColor?: string
+  /** Particle config (stars / dust) rendered inside the portal */
+  sceneParticles?: ParticleConfig
+  /** Layer objects (planets / clouds) rendered inside the portal */
+  sceneObjects?: LayerObjectDef[]
+  /** Depth multipliers for the 3 scene layers [far, mid, close].
+   *  Higher = more parallax shift with cursor. */
+  layerDepths?: [number, number, number]
+  /** Warp-forward scale multipliers per scene layer */
+  warpScales?: [number, number, number]
+  /** Target opacity per scene layer when warpZ = 1 */
+  warpOpacities?: [number, number, number]
+  /** 0 = idle, 1 = fully warped forward. Controls the "entering" effect. */
+  warpZ?: number
+
   width?: number
   height?: number
   maxOffset?: number
@@ -40,6 +60,19 @@ export interface ParallaxPortalProps {
   expandDuration?: number
   /** Fired after the portal finishes expanding to fullscreen */
   onExpanded?: () => void
+  /**
+   * Called the moment the portal is clicked (before the expand animation begins).
+   * Use this to trigger navigation, audio, state changes, etc.
+   */
+  onPortalClick?: () => void
+  /**
+   * Extra CSSProperties merged into the card style while the portal is
+   * expanding (both the initial-paint frame and the animated frame).
+   * Drive this with React state set inside `onPortalClick` to customise
+   * the expansion — e.g. filter, background, opacity, transform, etc.
+   * These spread last, so they override the defaults.
+   */
+  expandingCardStyle?: CSSProperties
   /** Content revealed inside the fullscreen portal after expansion (scrolls on top of layers) */
   children?: ReactNode
 }
@@ -50,6 +83,13 @@ export interface ParallaxPortalProps {
 
 export default function ParallaxPortal({
   layers,
+  bgColor,
+  sceneParticles,
+  sceneObjects = [],
+  layerDepths = [0.5, 0.3, 0.1],
+  warpScales = [0.3, 1.5, 5.0],
+  warpOpacities = [1.0, 0.3, 0.0],
+  warpZ: warpZProp = 0,
   width = 520,
   height = 340,
   maxOffset = 110,
@@ -63,9 +103,50 @@ export default function ParallaxPortal({
   glare = true,
   expandDuration = 900,
   onExpanded,
+  onPortalClick,
+  expandingCardStyle,
   children,
 }: ParallaxPortalProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const hasScene = sceneObjects.length > 0 || !!sceneParticles
+
+  /* ── Warp-on-click timing ──────────────────────────────────────────── */
+  const warpStartRef = useRef<number | null>(null)
+  const internalWarpTarget = useRef(0)
+  const expandDurationRef = useRef(expandDuration)
+  useEffect(() => { expandDurationRef.current = expandDuration }, [expandDuration])
+
+  /* ── Scene particle generation ─────────────────────────────────────── */
+  const [generatedParticles, setGeneratedParticles] = useState<ParticleDef[]>([])
+
+  useEffect(() => {
+    if (!sceneParticles) return
+    const list: ParticleDef[] = []
+    let id = 0
+    sceneParticles.counts.forEach((count, layer) => {
+      const [minSize, maxSize] = sceneParticles.sizes[layer]
+      const [baseOp, opVar] = sceneParticles.opacities[layer]
+      for (let i = 0; i < count; i++) {
+        list.push({
+          id: id++,
+          x: Math.random() * 100,
+          y: Math.random() * 200 - 50,
+          size: Math.random() * (maxSize - minSize) + minSize,
+          opacity: Math.random() * opVar + baseOp,
+          duration: Math.random() * 3 + 2,
+          delay: Math.random() * 5,
+          layer,
+          rotation: Math.random() * 360,
+        })
+      }
+    })
+    setGeneratedParticles(list)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ── Warp tracking (smooth interpolation) ──────────────────────────── */
+  const warpZRef = useRef(warpZProp)
+  const currentWarpZ = useRef(0)
+  useEffect(() => { warpZRef.current = warpZProp }, [warpZProp])
 
   /* ── Tilt tracking ─────────────────────────────────────────────────── */
   const tiltFalloffRef = useRef(tiltFalloff)
@@ -114,6 +195,23 @@ export default function ParallaxPortal({
     }
 
     setPos({ x: c.x, y: c.y })
+
+    // Drive internal warp forward from click timestamp
+    if (warpStartRef.current !== null) {
+      const elapsed = performance.now() - warpStartRef.current
+      const t = Math.min(elapsed / expandDurationRef.current, 1)
+      // ease-in curve so the rush accelerates into the portal
+      internalWarpTarget.current = t * t
+    }
+
+    // Smoothly interpolate warp for scene layers (faster lerp during expansion)
+    const effectiveWarpTarget = Math.max(warpZRef.current, internalWarpTarget.current)
+    const warpLerp = warpStartRef.current !== null ? 0.07 : 0.02
+    currentWarpZ.current += (effectiveWarpTarget - currentWarpZ.current) * warpLerp
+    if (Math.abs(currentWarpZ.current - effectiveWarpTarget) < 0.001) {
+      currentWarpZ.current = effectiveWarpTarget
+    }
+
     rafId.current = requestAnimationFrame(animate)
   }, [updatePhase])
 
@@ -174,6 +272,11 @@ export default function ParallaxPortal({
     if (phase !== 'idle') return
     updatePhase('flattening')
     target.current = { x: 0, y: 0 }
+    // Kick off the warp-forward animation timed to the expansion
+    warpStartRef.current = performance.now()
+    internalWarpTarget.current = 0
+    // Expose click to the consumer for custom behaviour
+    onPortalClick?.()
   }
 
   /* ── Transition end → expansion complete ───────────────────────────── */
@@ -230,8 +333,8 @@ export default function ParallaxPortal({
     cardStyle = {
       position: 'fixed',
       boxSizing: 'border-box',
-      left: animating ? 0 : capturedRect.left,
-      top: animating ? 0 : capturedRect.top,
+     // left: '-50vw',
+    //  top: '-50vh',
       width: animating ? '100vw' : capturedRect.width,
       height: animating ? '100vh' : capturedRect.height,
       overflow: 'hidden',
@@ -252,6 +355,8 @@ export default function ParallaxPortal({
             `border-color ${dur} ${ease}`,
           ].join(', ')
         : 'none',
+      // Consumer overrides — spread last so they win
+      ...expandingCardStyle,
     }
   } else {
     // expanded — fullscreen background
@@ -270,6 +375,9 @@ export default function ParallaxPortal({
     }
   }
 
+  /* ── Warp-derived values for scene layers ────────────────────────── */
+  const w = currentWarpZ.current
+
   /* ── Render ────────────────────────────────────────────────────────── */
   return (
     <>
@@ -282,20 +390,22 @@ export default function ParallaxPortal({
           ref={cardRef}
           onClick={handleClick}
           onTransitionEnd={handleTransitionEnd}
-          style={cardStyle}
+          style={{
+            ...cardStyle,
+            backgroundColor: hasScene ? bgColor : undefined,
+          }}
         >
-          {/* ── Parallax layers ─────────────────────────────────────────── */}
-          {layers.map((layer, i) => {
+          {/* ── Static image layers (original behaviour) ───────────────── */}
+          {layers && layers.map((layer, i) => {
             const shift = layer.depth * maxOffset
             const offsetX = isExpanded ? 0 : -pos.x * shift
             const offsetY = isExpanded ? 0 : -pos.y * shift
 
             return (
               <div
-                key={i}
+                key={`img-${i}`}
                 style={{
                   position: 'absolute',
-                  // Centre via negative inset — avoids left/top 50% + translate issues
                   left: isFixed ? `calc(-${shift}px + ${offsetX}px)` : (width + shift * 2 - width) / -2 + offsetX,
                   top: isFixed ? `calc(-${shift}px + ${offsetY}px)` : (height + shift * 2 - height) / -2 + offsetY,
                   width: isFixed ? `calc(100% + ${shift * 2}px)` : width + shift * 2,
@@ -320,6 +430,112 @@ export default function ParallaxPortal({
                   }}
                   sizes={isFixed ? '100vw' : `${Math.round(width + shift * 2)}px`}
                 />
+              </div>
+            )
+          })}
+
+          {/* ── Scene depth layers (background-style objects/particles) ── */}
+          {hasScene && [0, 1, 2].map((layerIdx) => {
+            const depth = layerDepths[layerIdx]
+            const shift = depth * maxOffset
+            const offsetX = isExpanded ? 0 : -pos.x * shift
+            const offsetY = isExpanded ? 0 : -pos.y * shift
+
+            const warpScale = 1 + w * warpScales[layerIdx]
+            const warpOpacity = 1 - w * (1 - warpOpacities[layerIdx])
+
+            const layerParticles = generatedParticles.filter((p) => p.layer === layerIdx)
+            const layerObjects = sceneObjects.filter((o) => o.layer === layerIdx)
+
+            return (
+              <div
+                key={`scene-${layerIdx}`}
+                style={{
+                  position: 'absolute',
+                  left: isFixed ? `calc(-${shift}px + ${offsetX}px)` : -shift + offsetX,
+                  top: isFixed ? `calc(-${shift}px + ${offsetY}px)` : -shift + offsetY,
+                  width: isFixed ? `calc(100% + ${shift * 2}px)` : width + shift * 2,
+                  height: isFixed ? `calc(100% + ${shift * 2}px)` : height + shift * 2,
+                  zIndex: 10 + layerIdx,
+                  pointerEvents: 'none',
+                  willChange: 'transform',
+                  transform: `scale(${warpScale})`,
+                  opacity: warpOpacity,
+                  transformOrigin: 'center center',
+                }}
+              >
+                {/* Particles */}
+                {sceneParticles && layerParticles.map((p) => (
+                  <div
+                    key={p.id}
+                    className={`absolute ${sceneParticles.animationClass ?? ''}`}
+                    style={{
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      width: `${p.size}px`,
+                      height: `${p.size}px`,
+                      opacity: p.opacity,
+                      animationDuration: `${p.duration}s`,
+                      animationDelay: `${p.delay}s`,
+                    }}
+                  >
+                    <Image src={sceneParticles.src} alt="" fill className="object-contain" />
+                  </div>
+                ))}
+
+                {/* Objects */}
+                {layerObjects.map((obj) => {
+                  const hasRot = !!obj.rotationAnimation
+                  const hasSpin = !!obj.spinAnimation
+
+                  let rotStyle: CSSProperties
+                  if (hasSpin) {
+                    rotStyle = { animation: `portal-spin-${obj.id} ${obj.spinAnimation!.duration}s linear infinite` }
+                  } else if (hasRot) {
+                    rotStyle = { animation: `portal-osc-${obj.id} ${obj.rotationAnimation!.duration * 2}s ease-in-out infinite` }
+                  } else {
+                    rotStyle = { transform: `rotate(${obj.rotate ?? 0}deg)` }
+                  }
+
+                  return (
+                    <div
+                      key={obj.id}
+                      className="absolute"
+                      style={{
+                        left: `${obj.x}%`,
+                        top: `${obj.y}%`,
+                        width: `${obj.size}vw`,
+                        height: `${obj.size}vw`,
+                        opacity: obj.opacity ?? 1,
+                        ...rotStyle,
+                      }}
+                    >
+                      {hasSpin && (
+                        <style>{`
+                          @keyframes portal-spin-${obj.id} {
+                            from { transform: rotate(0deg); }
+                            to { transform: rotate(${obj.spinAnimation!.direction === 'counter-clockwise' ? '-360' : '360'}deg); }
+                          }
+                        `}</style>
+                      )}
+                      {hasRot && (
+                        <style>{`
+                          @keyframes portal-osc-${obj.id} {
+                            0%, 100% { transform: rotate(${obj.rotationAnimation!.minDegrees}deg); }
+                            50% { transform: rotate(${obj.rotationAnimation!.maxDegrees}deg); }
+                          }
+                        `}</style>
+                      )}
+                      <Image
+                        src={obj.src}
+                        alt={obj.id}
+                        fill
+                        className="object-contain"
+                        style={{ imageRendering: 'pixelated' }}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             )
           })}

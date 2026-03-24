@@ -6,12 +6,13 @@ import PixelArtDisplay from '../../components/PixelArtDisplay'
 import IntroCard from '../../components/IntroCard'
 import ScrollFadeIn from '../../components/ScrollFadeIn'
 import Parallax3DPixel, { PortalLayer } from '../../components/Parallax3DPixel'
+import type { LayerObjectDef, ParticleConfig } from '../../components/ParallaxBackground'
 import localFont from 'next/font/local'
 import ProjectCard from '../../components/ProjectCard'
 import SequentialFadeIn from '../../components/SequentialFadeIn'
 import { useTheme } from '../../components/ThemeContext'
 import DashboardSection from '../../components/DashboardSection'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 const lunarLocal = localFont({
   src: [
@@ -23,19 +24,87 @@ const lunarLocal = localFont({
   ],
 })
 
-const layers: PortalLayer[] = [
-  { src: '/3d-objects/earthPortal/skyBackground.png', alt: 'Sky',          depth: .5 },  // furthest — moves most
-  { src: '/3d-objects/earthPortal/cloudLayer2.png',   alt: 'Cloud layer 2', depth: 0.3 },
-  { src: '/3d-objects/earthPortal/cloudLayer1.png',   alt: 'Cloud layer 1', depth: 0.1 }, // closest — moves least
+// const layers: PortalLayer[] = [
+//   { src: '/3d-objects/earthPortal/skyBackground.png', alt: 'Sky',          depth: .5 },  // furthest — moves most
+//   { src: '/3d-objects/earthPortal/cloudLayer2.png',   alt: 'Cloud layer 2', depth: 0.3 },
+//   { src: '/3d-objects/earthPortal/cloudLayer1.png',   alt: 'Cloud layer 1', depth: 0.1 }, // closest — moves least
+// ]
+
+/* ── Earth-portal scene: objects that live "inside" the portal ──────── */
+const EARTH_PORTAL_OBJECTS: LayerObjectDef[] = [
+  // Far layer (0) — slow parallax, distant
+  {
+    id: 'ep-cloud-far-1',
+    src: '/3d-objects/earthPortal/cloudLayer2.png',
+    layer: 0,
+    x: 15,
+    y: 25,
+    size: 30,
+    opacity: 0.5,
+  },
+  {
+    id: 'ep-cloud-far-2',
+    src: '/3d-objects/earthPortal/cloudLayer2.png',
+    layer: 0,
+    x: 65,
+    y: 35,
+    size: 25,
+    opacity: 0.4,
+  },
+  // Mid layer (1)
+  {
+    id: 'ep-cloud-mid-1',
+    src: '/3d-objects/earthPortal/cloudLayer1.png',
+    layer: 1,
+    x: 5,
+    y: 40,
+    size: 35,
+    opacity: 0.7,
+  },
+  {
+    id: 'ep-cloud-mid-2',
+    src: '/3d-objects/earthPortal/cloudLayer1.png',
+    layer: 1,
+    x: 55,
+    y: 55,
+    size: 28,
+    opacity: 0.65,
+  },
+  // Close layer (2) — fastest parallax
+  {
+    id: 'ep-cloud-close-1',
+    src: '/3d-objects/earthPortal/cloudLayer1.png',
+    layer: 2,
+    x: -5,
+    y: 60,
+    size: 40,
+    opacity: 0.85,
+  },
 ]
 
 export default function Home(){
-  const { setScrollY } = useTheme()
+  const { setScrollY, warpZ, setWarpZ, activeBackground, setActiveBackground } = useTheme()
+  const [warped, setWarped] = useState(false)
 
-  // Show navbar after mount
-  // useEffect(() => {
-  //   setShowNavbar(true)
-  // }, [setShowNavbar])
+  // ── Arrival warp: start "past" the layers and ease back to normal ──
+  useEffect(() => {
+    // warpZ starts at 1 (set in ThemeContext), animate it back to 0
+    const start = performance.now()
+    const duration = 2000 // ms for the arrival ease
+    let rafId: number
+
+    const tick = () => {
+      const elapsed = performance.now() - start
+      const t = Math.min(elapsed / duration, 1)
+      // ease-out curve: fast start, gentle landing
+      const eased = 1 - Math.pow(1 - t, 3)
+      setWarpZ(1 - eased)   // 1 → 0
+      if (t < 1) rafId = requestAnimationFrame(tick)
+    }
+
+    rafId = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafId)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track scroll position and update theme context for space background parallax
   useEffect(() => {
@@ -227,11 +296,37 @@ export default function Home(){
           <div className="flex flex-col items-center mt-12">
             <h3 className={`text-xl mb-4 text-center ${lunarLocal.className}`}>3D Pixel Parallax Test</h3>
             <Parallax3DPixel
-              layers={layers}
+              bgColor="#4a90c4"
+              sceneObjects={EARTH_PORTAL_OBJECTS}
+              layerDepths={[0.5, 0.3, 0.1]}
+              warpScales={[0.2, 1.0, 3.5]}
+              warpOpacities={[1.0, 0.4, 0.0]}
+              warpZ={warpZ}
               width={400}
               height={300}
               onExpanded={() => console.log('Portal expanded!')}
+
             />
+
+            {/* Temp warp button */}
+            <button
+              onClick={() => {
+                const next = !warped
+                setWarped(next)
+                setWarpZ(next ? 1 : 0)
+              }}
+              className="mt-6 px-6 py-2 rounded border border-blue-400/50 text-blue-300 hover:bg-blue-500/20 transition-colors"
+            >
+              {warped ? 'Warp Back' : 'Warp Forward'}
+            </button>
+
+            {/* Temp background toggle */}
+            <button
+              onClick={() => setActiveBackground(activeBackground === 'space' ? 'earth' : 'space')}
+              className="mt-3 px-6 py-2 rounded border border-green-400/50 text-green-300 hover:bg-green-500/20 transition-colors"
+            >
+              Switch to {activeBackground === 'space' ? 'Earth' : 'Space'}
+            </button>
           </div>
         </ScrollFadeIn>
       </section>
