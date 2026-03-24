@@ -290,8 +290,10 @@ export default function ParallaxBackground({
               const driftDir = obj.drift?.direction ?? 'left'
               const driftDelay = obj.drift?.delay ?? 0
               // Duration = total distance (viewport + object width) / speed
+              // Use a fixed reference width to avoid SSR window access
+              const REF_W = 1920
               const driftDuration = hasDrift
-                ? ((window?.innerWidth ?? 1920) + (obj.size / 100) * (window?.innerWidth ?? 1920)) / obj.drift!.speed
+                ? (REF_W + (obj.size / 100) * REF_W) / obj.drift!.speed
                 : 0
 
               return (
