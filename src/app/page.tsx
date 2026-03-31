@@ -3,8 +3,6 @@
 import SocialLinks from '../../components/SocialLinks'
 import PixelArtDisplay from '../../components/PixelArtDisplay'
 import ScrollFadeIn from '../../components/ScrollFadeIn'
-import Parallax3DPixel from '../../components/Parallax3DPixel'
-import type { LayerObjectDef } from '../../components/ParallaxBackground'
 import localFont from 'next/font/local'
 import ProjectCard from '../../components/ProjectCard'
 import SequentialFadeIn from '../../components/SequentialFadeIn'
@@ -17,20 +15,11 @@ const lunarLocal = localFont({
   src: [{ path: '../../public/fonts/PixelFont.ttf', weight: '400', style: 'normal' }],
 })
 
-/* ── Portal scene objects ──────────────────────────────────────────── */
-const EARTH_PORTAL_OBJECTS: LayerObjectDef[] = [
-  { id: 'ep-cloud-far-1', src: '/3d-objects/earthPortal/cloudLayer2.png', layer: 0, x: 15, y: 25, size: 30, opacity: 0.5 },
-  { id: 'ep-cloud-far-2', src: '/3d-objects/earthPortal/cloudLayer2.png', layer: 0, x: 65, y: 35, size: 25, opacity: 0.4 },
-  { id: 'ep-cloud-mid-1', src: '/3d-objects/earthPortal/cloudLayer1.png', layer: 1, x: 5, y: 40, size: 35, opacity: 0.7 },
-  { id: 'ep-cloud-mid-2', src: '/3d-objects/earthPortal/cloudLayer1.png', layer: 1, x: 55, y: 55, size: 28, opacity: 0.65 },
-  { id: 'ep-cloud-close-1', src: '/3d-objects/earthPortal/cloudLayer1.png', layer: 2, x: -5, y: 60, size: 40, opacity: 0.85 },
-]
-
 /* ════════════════════════════════════════════════════════════════════════
    SPACE THEME — dashboard, intro, language icons, nav, portal, socials
    ════════════════════════════════════════════════════════════════════ */
 function SpaceThemeLayout() {
-  const { warpZ, switchTheme } = useTheme()
+  const { setWarpXY, setWarpZ } = useTheme()
 
   return (
     <>
@@ -57,25 +46,34 @@ function SpaceThemeLayout() {
 
         {/* Navigation icons — clicking switches theme */}
         <SequentialFadeIn staggerDelay={200} initialDelay={200}>
-          <PixelArtDisplay imageSrc="/images/Island.png" rotationAmount={2} rotationDuration={5.9} imageScale={1} text="Earth Theme" onClick={() => switchTheme('earth')} />
+          <PixelArtDisplay
+            imageSrc="/images/Island.png"
+            rotationAmount={2}
+            rotationDuration={5.9}
+            imageScale={1}
+            text="Earth Theme" 
+            onClick={() => {
+              setWarpZ(65);
+              setWarpXY(80, 20);
+            }}
+         />
+          <PixelArtDisplay
+            imageSrc="/images/Island.png"
+            rotationAmount={2}
+            rotationDuration={5.9}
+            imageScale={1}
+            text="Space Theme" 
+            onClick={() => {
+              setWarpZ(0);
+              setWarpXY(80, 20);
+            }}
+         />
         </SequentialFadeIn>
       </div>
 
-      {/* Earth portal */}
+      {/* Earth portal — rendered from parent to persist during cinematic */}
       <ScrollFadeIn delay={200}>
         <div className="flex flex-col items-center mt-12">
-          <h3 className={`text-xl mb-4 text-center ${lunarLocal.className}`}>3D Pixel Parallax Test</h3>
-          <Parallax3DPixel
-            bgColor="#4a90c4"
-            sceneObjects={EARTH_PORTAL_OBJECTS}
-            layerDepths={[0.5, 0.3, 0.1]}
-            warpScales={[0.2, 1.0, 3.5]}
-            warpOpacities={[1.0, 0.4, 0.0]}
-            warpZ={warpZ}
-            width={400}
-            height={300}
-            onPortalClick={() => switchTheme('earth')}
-          />
         </div>
       </ScrollFadeIn>
 
@@ -203,7 +201,7 @@ export default function Home() {
     const tick = () => {
       const t = Math.min((performance.now() - start) / duration, 1)
       const eased = 1 - Math.pow(1 - t, 3)
-      setWarpZ(1 - eased)
+      setWarpZ((1 - eased) * 100)
       if (t < 1) rafId = requestAnimationFrame(tick)
     }
     rafId = requestAnimationFrame(tick)

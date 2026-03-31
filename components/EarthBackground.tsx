@@ -18,7 +18,7 @@ const PARTICLES: ParticleConfig = {
   opacities: [[0.15, 0.1], [0.25, 0.15], [0.35, 0.2]],
 }
 
-const OBJECTS: LayerObjectDef[] = [
+const EARTH_OBJECTS: LayerObjectDef[] = [
   // Far layer — slow, distant clouds
   {
     id: 'cloud-far-1',
@@ -96,7 +96,7 @@ export default function EarthBackground({ visible = false }: { visible?: boolean
       warpScales={[0.2, 1.0, 3.5]}
       warpOpacities={[1.0, 0.4, 0.0]}
       // particles={PARTICLES}
-      objects={OBJECTS}
+      objects={EARTH_OBJECTS}
       visible={visible}
     />
   )

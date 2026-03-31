@@ -48,6 +48,10 @@ export interface LayerObjectDef {
     /** Seconds of delay before the object starts drifting */
     delay?: number
   }
+  /** Swap to a higher-detail image as warpZ increases.
+   *  Each entry fires when `warpZ >= above` (0–100 scale).
+   *  The highest matching threshold wins. */
+  zVariants?: Array<{ above: number; src: string }>
 }
 
 export interface ParticleConfig {
@@ -97,7 +101,7 @@ export default function ParallaxBackground({
   objects = [],
   visible = true,
 }: ParallaxBackgroundProps) {
-  const { warpZ } = useTheme()
+  const { warpZ, warpX, warpY } = useTheme()
 
   const [generatedParticles, setGeneratedParticles] = useState<ParticleDef[]>([])
   const [isLoaded, setIsLoaded] = useState(false)
@@ -107,6 +111,10 @@ export default function ParallaxBackground({
   const rafRef = useRef<number | null>(null)
   const warpZRef = useRef(warpZ)
   const currentWarpZ = useRef(warpZ)
+  const warpXRef = useRef(warpX)
+  const currentWarpX = useRef(warpX)
+  const warpYRef = useRef(warpY)
+  const currentWarpY = useRef(warpY)
 
   const currentScrollOffset = useRef(0)
   const currentMouseX = useRef(0)
@@ -114,6 +122,8 @@ export default function ParallaxBackground({
 
   // Keep warpZ ref in sync
   useEffect(() => { warpZRef.current = warpZ }, [warpZ])
+  useEffect(() => { warpXRef.current = warpX }, [warpX])
+  useEffect(() => { warpYRef.current = warpY }, [warpY])
 
   // Keep config refs for rAF access
   const layerSpeedsRef = useRef(layerSpeeds)
@@ -166,7 +176,15 @@ export default function ParallaxBackground({
     if (Math.abs(currentWarpZ.current - warpZRef.current) < 0.001) {
       currentWarpZ.current = warpZRef.current
     }
-    const w = currentWarpZ.current
+    currentWarpX.current = lerp(currentWarpX.current, warpXRef.current, 0.02)
+    if (Math.abs(currentWarpX.current - warpXRef.current) < 0.001) {
+      currentWarpX.current = warpXRef.current
+    }
+    currentWarpY.current = lerp(currentWarpY.current, warpYRef.current, 0.02)
+    if (Math.abs(currentWarpY.current - warpYRef.current) < 0.001) {
+      currentWarpY.current = warpYRef.current
+    }
+    const w = currentWarpZ.current / 100
     const speeds = layerSpeedsRef.current
     const wScales = warpScalesRef.current
     const wOpacities = warpOpacitiesRef.current
@@ -191,8 +209,9 @@ export default function ParallaxBackground({
       const warpScale = 1 + w * wScales[layer]
       const warpOpacity = 1 - w * (1 - wOpacities[layer])
 
+      el.style.transformOrigin = `${currentWarpX.current}% ${currentWarpY.current}%`
       el.style.transform = `translate(${mx}px, ${sy + my}px) scale(${warpScale})`
-      el.style.opacity = `${warpOpacity}`
+      //el.style.opacity = `${warpOpacity}`
     })
   }
 
@@ -262,7 +281,13 @@ export default function ParallaxBackground({
                     animationDelay: `${p.delay}s`,
                   }}
                 >
-                  <Image src={particles.src} alt="" fill className="object-contain" />
+                  <Image
+                    src={particles.src}
+                    alt=""
+                    fill
+                    className="object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
                 </div>
               ))}
 
@@ -272,6 +297,15 @@ export default function ParallaxBackground({
             .map((obj) => {
               const hasRot = !!obj.rotationAnimation
               const hasSpin = !!obj.spinAnimation
+
+              // Resolve active src — pick highest zVariant whose threshold is met
+              const activeSrc = (() => {
+                if (!obj.zVariants?.length) return obj.src
+                const match = [...obj.zVariants]
+                  .sort((a, b) => b.above - a.above)
+                  .find(v => warpZ >= v.above)
+                return match ? match.src : obj.src
+              })()
 
               let rotStyle: React.CSSProperties
               if (hasSpin) {
@@ -337,7 +371,7 @@ export default function ParallaxBackground({
                     `}</style>
                   )}
                   <Image
-                    src={obj.src}
+                    src={activeSrc}
                     alt={obj.id}
                     fill
                     className="object-contain"
