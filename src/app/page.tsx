@@ -10,6 +10,8 @@ import { useTheme } from '../../components/ThemeContext'
 import DashboardSection from '../../components/DashboardSection'
 import ThemePage from '../../components/ThemePage'
 import { useEffect } from 'react'
+import SectionPage from '../../components/SectionPage'
+import { useSection } from '../../components/SectionContext'
 
 const lunarLocal = localFont({
   src: [{ path: '../../public/fonts/PixelFont.ttf', weight: '400', style: 'normal' }],
@@ -19,6 +21,7 @@ const lunarLocal = localFont({
    SPACE THEME — dashboard, intro, language icons, nav, portal, socials
    ════════════════════════════════════════════════════════════════════ */
 function SpaceThemeLayout() {
+  const { switchSection } = useSection()
   const { setWarpXY, setWarpZ } = useTheme()
 
   return (
@@ -55,6 +58,7 @@ function SpaceThemeLayout() {
             onClick={() => {
               setWarpZ(65);
               setWarpXY(80, 20);
+              switchSection('projects');
             }}
          />
           <PixelArtDisplay
@@ -64,6 +68,7 @@ function SpaceThemeLayout() {
             imageScale={1}
             text="Space Theme" 
             onClick={() => {
+              switchSection('main');
               setWarpZ(0);
               setWarpXY(80, 20);
             }}
@@ -137,53 +142,138 @@ function EarthThemeLayout() {
           </ScrollFadeIn>
         </div>
       </section>
-
-      {/* 3D Modeling */}
-      <section className="w-full py-16 flex flex-col items-center">
-        <ScrollFadeIn>
-          <h2 className={`text-2xl md:text-[40px] text-center mb-10 ${lunarLocal.className}`}>3D Modeling</h2>
-        </ScrollFadeIn>
-        <ScrollFadeIn delay={200}>
-          <div className="text-center text-gray-400 py-20">
-            <p className="text-xl">3D modeling projects coming soon...</p>
-          </div>
-        </ScrollFadeIn>
-      </section>
-
-      {/* Pixel Art */}
-      <section className="w-full py-16 flex flex-col items-center">
-        <ScrollFadeIn>
-          <h2 className={`text-2xl md:text-[40px] text-center mb-10 ${lunarLocal.className}`}>Pixel Art</h2>
-        </ScrollFadeIn>
-        <ScrollFadeIn delay={200}>
-          <div className="text-center text-gray-400 py-20">
-            <p className="text-xl">Pixel art gallery coming soon...</p>
-          </div>
-        </ScrollFadeIn>
-      </section>
-
-      {/* Commissions */}
-      <section className="w-full py-16 flex flex-col items-center">
-        <ScrollFadeIn>
-          <h2 className={`text-2xl md:text-[40px] text-center mb-10 ${lunarLocal.className}`}>Commissions</h2>
-        </ScrollFadeIn>
-        <ScrollFadeIn delay={200}>
-          <div className="text-center text-gray-400 py-20">
-            <p className="text-xl">Commission information coming soon...</p>
-          </div>
-        </ScrollFadeIn>
-      </section>
-
-      {/* Back to space button */}
-      <section className="w-full py-16 flex justify-center">
-        <button
-          onClick={() => switchTheme('space')}
-          className="px-6 py-2 rounded border border-blue-400/50 text-blue-300 hover:bg-blue-500/20 transition-colors"
-        >
-          ← Back to Space
-        </button>
-      </section>
     </>
+  )
+}
+
+function ProjectViewLayout() {
+  const { switchSection } = useSection()
+  const { setWarpXY, setWarpZ } = useTheme()
+
+  return (
+    
+      <SequentialFadeIn>
+          <PixelArtDisplay
+            imageSrc="/images/Island.png"
+            rotationAmount={2}
+            rotationDuration={5.9}
+            imageScale={1}
+            text="Space Theme" 
+            onClick={() => {
+              setWarpZ(0);
+              setWarpXY(80, 20);
+              switchSection('main');
+            }}
+         />
+               <section className="w-full pt-24 pb-16 flex flex-col items-center">
+        <ScrollFadeIn>
+          <h2 className={`text-2xl md:text-[40px] text-center mb-10 ${lunarLocal.className}`}>Roblox Projects</h2>
+        </ScrollFadeIn>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-[100%] px-4">
+          <ScrollFadeIn delay={300}>
+            <ProjectCard
+              title="Advanced Status Effect System"
+              thumbnail="/videos/FireStatus.mp4"
+              description="A comprehensive OOP driven status effect framework for RPG games, enabling unique interactions between multiple custom effects. Includes over 40 built-in effects and 100+ synergies, with an easy-to-use API for developers to create and integrate their own effects seamlessly."
+              secondDescription="Lunarcrest, Descent, SKIP - [all platforms], Cursefire II"
+              images={['/images/statusEffect.png', '/videos/FireStatus.mp4', '/images/ModelsThumbnail.jpg', '/images/robloxPixelImage.png']}
+              date="March 2025"
+              features={['efficient data management', 'custom visual effects', 'over 40+ effects / 100+ effect synergies', 'dynamic UI', 'easy integration into existing projects', 'easy creation of custom effects/synergies']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Multi-Platform Rock Skipping Minigame"
+              thumbnail="/videos/MainMenuShowcase.mp4"
+              description="A fun and engaging rock skipping minigame framework that works with PC, console, mobile, and VR. Features realistic physics, customizable rocks, multiple game modes, and an intuitive control system designed for all platforms."
+              secondDescription="SKIP - all platforms"
+              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/buildGIF1.gif', '/images/robloxPixelImage.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Card Collection Module"
+              thumbnail="/videos/CardViewerShowcase1.mp4"
+              description="A combination of UI and backend systems that allow players to collect, view, and manage a collection of cards within a game. Features include dynamic card rendering, sorting/filtering options, and integration with in-game rewards."
+              secondDescription="SKIP - all platforms"
+              images={['/videos/CardVeiwerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={300}>
+            <ProjectCard
+              title="Advanced Status Effect System"
+              thumbnail="/videos/FireStatus.mp4"
+              description="A comprehensive OOP driven status effect framework for RPG games, enabling unique interactions between multiple custom effects. Includes over 40 built-in effects and 100+ synergies, with an easy-to-use API for developers to create and integrate their own effects seamlessly."
+              secondDescription="Lunarcrest, Descent, SKIP - [all platforms], Cursefire II"
+              images={['/images/statusEffect.png', '/videos/FireStatus.mp4', '/images/ModelsThumbnail.jpg', '/images/robloxPixelImage.png']}
+              date="March 2025"
+              features={['efficient data management', 'custom visual effects', 'over 40+ effects / 100+ effect synergies', 'dynamic UI', 'easy integration into existing projects', 'easy creation of custom effects/synergies']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Multi-Platform Rock Skipping Minigame"
+              thumbnail="/videos/MainMenuShowcase.mp4"
+              description="A fun and engaging rock skipping minigame framework that works with PC, console, mobile, and VR. Features realistic physics, customizable rocks, multiple game modes, and an intuitive control system designed for all platforms."
+              secondDescription="SKIP - all platforms"
+              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/buildGIF1.gif', '/images/robloxPixelImage.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Card Collection Module"
+              thumbnail="/videos/CardViewerShowcase1.mp4"
+              description="A combination of UI and backend systems that allow players to collect, view, and manage a collection of cards within a game. Features include dynamic card rendering, sorting/filtering options, and integration with in-game rewards."
+              secondDescription="SKIP - all platforms"
+              images={['/videos/CardVeiwerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={300}>
+            <ProjectCard
+              title="Advanced Status Effect System"
+              thumbnail="/videos/FireStatus.mp4"
+              description="A comprehensive OOP driven status effect framework for RPG games, enabling unique interactions between multiple custom effects. Includes over 40 built-in effects and 100+ synergies, with an easy-to-use API for developers to create and integrate their own effects seamlessly."
+              secondDescription="Lunarcrest, Descent, SKIP - [all platforms], Cursefire II"
+              images={['/images/statusEffect.png', '/videos/FireStatus.mp4', '/images/ModelsThumbnail.jpg', '/images/robloxPixelImage.png']}
+              date="March 2025"
+              features={['efficient data management', 'custom visual effects', 'over 40+ effects / 100+ effect synergies', 'dynamic UI', 'easy integration into existing projects', 'easy creation of custom effects/synergies']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Multi-Platform Rock Skipping Minigame"
+              thumbnail="/videos/MainMenuShowcase.mp4"
+              description="A fun and engaging rock skipping minigame framework that works with PC, console, mobile, and VR. Features realistic physics, customizable rocks, multiple game modes, and an intuitive control system designed for all platforms."
+              secondDescription="SKIP - all platforms"
+              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/buildGIF1.gif', '/images/robloxPixelImage.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+          <ScrollFadeIn delay={100}>
+            <ProjectCard
+              title="Card Collection Module"
+              thumbnail="/videos/CardViewerShowcase1.mp4"
+              description="A combination of UI and backend systems that allow players to collect, view, and manage a collection of cards within a game. Features include dynamic card rendering, sorting/filtering options, and integration with in-game rewards."
+              secondDescription="SKIP - all platforms"
+              images={['/videos/CardVeiwerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
+              date="June 2025"
+              features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
+            />
+          </ScrollFadeIn>
+        </div>
+      </section>
+      </SequentialFadeIn>
+  
   )
 }
 
@@ -217,13 +307,13 @@ export default function Home() {
 
   return (
     <>
-      <ThemePage theme="space">
+      <SectionPage section="main">
         <SpaceThemeLayout />
-      </ThemePage>
+      </SectionPage>
 
-      <ThemePage theme="earth">
-        <EarthThemeLayout />
-      </ThemePage>
+      <SectionPage section="projects">
+        <ProjectViewLayout />
+      </SectionPage>
     </>
   )
 }

@@ -1,6 +1,7 @@
 import './globals.css'
 import ThemedBackground from '../../components/ThemedBackground'
 import { ThemeProvider } from '../../components/ThemeContext'
+import { SectionProvider } from '../../components/SectionContext'
 import SpaceAudioVisualizer from '../../components/SpaceAudioVisualizer'
 
 export const metadata = {
@@ -13,9 +14,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body suppressHydrationWarning>
         <ThemeProvider>
-          <ThemedBackground />
-          <SpaceAudioVisualizer />
-            {children}
+          <SectionProvider defaultSection="main">
+            <ThemedBackground />
+            <SpaceAudioVisualizer />
+              {children}
+          </SectionProvider>
         </ThemeProvider>
       </body>
     </html>
