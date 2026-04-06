@@ -155,6 +155,8 @@ function SpotifyWidget({ data }: { data: SpotifyData | null }) {
 // ─── WakaTime Widget ─────────────────────────────────────────────────────────
 
 function WakaWidget({ data }: { data: WakaData | null }) {
+  const hasError = data && ('error' in data || data.totalSeconds === undefined);
+  
   return (
     <CardShell>
       {/* header */}
@@ -167,6 +169,10 @@ function WakaWidget({ data }: { data: WakaData | null }) {
 
       {!data ? (
         <Spinner />
+      ) : hasError ? (
+        <div className="h-24 flex items-center justify-center">
+          <p className="text-white/40 text-sm">unable to load stats</p>
+        </div>
       ) : (
         <>
           {/* total */}
@@ -240,6 +246,8 @@ function ContributionGrid({ weeks }: { weeks: ContributionWeek[] }) {
 }
 
 function GithubWidget({ data }: { data: GithubData | null }) {
+  const hasError = data && ('error' in data || !data.totalContributions);
+  
   return (
     <CardShell>
       {/* header */}
@@ -252,6 +260,10 @@ function GithubWidget({ data }: { data: GithubData | null }) {
 
       {!data ? (
         <Spinner />
+      ) : hasError ? (
+        <div className="h-24 flex items-center justify-center">
+          <p className="text-white/40 text-sm">unable to load stats</p>
+        </div>
       ) : (
         <>
           {/* stats row */}

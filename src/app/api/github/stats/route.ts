@@ -3,6 +3,10 @@ export const dynamic = "force-dynamic";
 const GITHUB_USERNAME = "xRugHere"; // your GitHub username
 
 export async function GET() {
+  if (!process.env.GITHUB_TOKEN) {
+    return Response.json({ error: "GitHub token not configured" }, { status: 500 });
+  }
+
   const query = `
     query {
       user(login: "${GITHUB_USERNAME}") {

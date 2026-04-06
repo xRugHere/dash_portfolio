@@ -1,7 +1,12 @@
 export const dynamic = "force-dynamic"
 
 export async function GET() {
-  const apiKey = process.env.WAKATIME_API_KEY!;
+  const apiKey = process.env.WAKATIME_API_KEY;
+  
+  if (!apiKey) {
+    return Response.json({ error: "WakaTime API key not configured" }, { status: 500 });
+  }
+  
   const encoded = Buffer.from(apiKey).toString("base64");
 
   const res = await fetch(

@@ -9,9 +9,10 @@ import SequentialFadeIn from '../../components/SequentialFadeIn'
 import { useTheme } from '../../components/ThemeContext'
 import LiveStatsRibbon from '../../components/LiveStatsRibbon'
 import ThemePage from '../../components/ThemePage'
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import SectionPage from '../../components/SectionPage'
 import { useSection } from '../../components/SectionContext'
+import IntroScreen from '../../components/IntroScreen'
 
 const lunarLocal = localFont({
   src: [{ path: '../../public/fonts/PixelFont.ttf', weight: '400', style: 'normal' }],
@@ -225,9 +226,16 @@ function ProjectViewLayout() {
    ════════════════════════════════════════════════════════════════════ */
 export default function Home() {
   const { setScrollY, setWarpZ } = useTheme()
+  const [introComplete, setIntroComplete] = useState(false)
 
-  // Arrival warp: start "past" the layers and ease back to normal
+  const handleIntroComplete = useCallback(() => {
+    setIntroComplete(true)
+  }, [])
+
+  // Arrival warp: ease warpZ from 100 → 0 AFTER the intro finishes
   useEffect(() => {
+    if (!introComplete) return
+
     const start = performance.now()
     const duration = 2000
     let rafId: number
@@ -239,7 +247,7 @@ export default function Home() {
     }
     rafId = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafId)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [introComplete]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track scroll position
   useEffect(() => {
@@ -250,6 +258,8 @@ export default function Home() {
 
   return (
     <>
+      <IntroScreen onComplete={handleIntroComplete} />
+
       <SectionPage section="main">
         <SpaceThemeLayout />
       </SectionPage>
