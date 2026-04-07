@@ -64,7 +64,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
         style={{
           position: 'absolute',
           color: inverted ? '#ffffff' : '#000000',
-          fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+          fontSize: 'clamp(1rem, 3vw, 1.6rem)',
           letterSpacing: '0.12em',
           opacity: phase >= 2 ? 1 : 0,
           transform: phase >= 2 ? 'scale(1)' : 'scale(0.92)',
@@ -82,19 +82,18 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
           opacity: phase >= 1 ? 1 : 0,
           transform:
             phase >= 2
-              ? 'translateX(min(-38vw, -200px)) scale(0.75)'
+              ? 'translateX(min(-18vw, -100px)) scale(0.75)'
               : 'translateX(0) scale(1)',
           filter: inverted ? 'none' : 'brightness(0)',
           transition:
             'opacity 0.8s ease, transform 1s cubic-bezier(0.4,0,0.2,1), filter 0.8s ease',
         }}
       >
-        {/* Replace with your own star image */}
         <Image
           src="/images/Pixel_Star1.png"
           alt=""
-          width={140}
-          height={140}
+          width={48}
+          height={48}
           priority
         />
       </div>
