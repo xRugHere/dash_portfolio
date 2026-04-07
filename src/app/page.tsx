@@ -227,6 +227,7 @@ function ProjectViewLayout() {
 export default function Home() {
   const { setScrollY, setWarpZ } = useTheme()
   const [introComplete, setIntroComplete] = useState(false)
+  const [contentReady, setContentReady] = useState(false)
 
   const handleIntroComplete = useCallback(() => {
     setIntroComplete(true)
@@ -237,16 +238,22 @@ export default function Home() {
     if (!introComplete) return
 
     const start = performance.now()
-    const duration = 2000
+    const duration = 1200
     let rafId: number
+    let settleTimer: ReturnType<typeof setTimeout>
     const tick = () => {
       const t = Math.min((performance.now() - start) / duration, 1)
       const eased = 1 - Math.pow(1 - t, 3)
       setWarpZ((1 - eased) * 100)
-      if (t < 1) rafId = requestAnimationFrame(tick)
+      if (t < 1) {
+        rafId = requestAnimationFrame(tick)
+      } else {
+        // Delay content reveal to let the visual lerp fully settle
+        settleTimer = setTimeout(() => setContentReady(true), 500)
+      }
     }
     rafId = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(rafId)
+    return () => { cancelAnimationFrame(rafId); clearTimeout(settleTimer) }
   }, [introComplete]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track scroll position
@@ -260,13 +267,21 @@ export default function Home() {
     <>
       <IntroScreen onComplete={handleIntroComplete} />
 
-      <SectionPage section="main">
-        <SpaceThemeLayout />
-      </SectionPage>
+      <div
+        style={{
+          opacity: contentReady ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+          pointerEvents: contentReady ? 'auto' : 'none',
+        }}
+      >
+        <SectionPage section="main">
+          <SpaceThemeLayout />
+        </SectionPage>
 
-      <SectionPage section="projects">
-        <ProjectViewLayout />
-      </SectionPage>
+        <SectionPage section="projects">
+          <ProjectViewLayout />
+        </SectionPage>
+      </div>
     </>
   )
 }

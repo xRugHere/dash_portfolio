@@ -172,15 +172,15 @@ export default function ParallaxBackground({
 
   // rAF transform loop
   const updateLayerTransforms = () => {
-    currentWarpZ.current = lerp(currentWarpZ.current, warpZRef.current, 0.02)
+    currentWarpZ.current = lerp(currentWarpZ.current, warpZRef.current, 0.08)
     if (Math.abs(currentWarpZ.current - warpZRef.current) < 0.001) {
       currentWarpZ.current = warpZRef.current
     }
-    currentWarpX.current = lerp(currentWarpX.current, warpXRef.current, 0.02)
+    currentWarpX.current = lerp(currentWarpX.current, warpXRef.current, 0.08)
     if (Math.abs(currentWarpX.current - warpXRef.current) < 0.001) {
       currentWarpX.current = warpXRef.current
     }
-    currentWarpY.current = lerp(currentWarpY.current, warpYRef.current, 0.02)
+    currentWarpY.current = lerp(currentWarpY.current, warpYRef.current, 0.08)
     if (Math.abs(currentWarpY.current - warpYRef.current) < 0.001) {
       currentWarpY.current = warpYRef.current
     }
@@ -211,7 +211,7 @@ export default function ParallaxBackground({
 
       el.style.transformOrigin = `${currentWarpX.current}% ${currentWarpY.current}%`
       el.style.transform = `translate(${mx}px, ${sy + my}px) scale(${warpScale})`
-      //el.style.opacity = `${warpOpacity}`
+      el.style.opacity = `${warpOpacity}`
     })
   }
 

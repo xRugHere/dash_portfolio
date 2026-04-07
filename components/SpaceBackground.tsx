@@ -83,6 +83,7 @@ export default function SpaceBackground({ visible = true }: { visible?: boolean 
   return (
     <ParallaxBackground
       bgColor="#010101"
+      warpOpacities={[0, 0, 0]}
       particles={PARTICLES}
       objects={OBJECTS}
       visible={visible}

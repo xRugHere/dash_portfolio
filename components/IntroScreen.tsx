@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
 import localFont from 'next/font/local'
 
 const lunarLocal = localFont({
@@ -11,12 +10,13 @@ const lunarLocal = localFont({
 /*
   Animation phases:
   0 — Pure white screen (brief hold)
-  1 — Star fades in at dead-centre (black via brightness filter)
-  2 — Star slides left; "Welcome!" text revealed behind it
-  3 — Colour inversion: bg → #010101, text → white, star → original colour
-  4 — Overlay fades to transparent, revealing the space background beneath
-  5 — Complete → unmount
+  1 — Terminal cursor appears, typing begins
+  2 — All chars deleted → colours invert (bg → #010101, text → white)
+  3 — Overlay fades to transparent, revealing the space background beneath
+  4 — Complete → unmount
 */
+
+const WELCOME_TEXT = 'Welcome!'
 
 interface IntroScreenProps {
   onComplete: () => void
@@ -24,24 +24,63 @@ interface IntroScreenProps {
 
 export default function IntroScreen({ onComplete }: IntroScreenProps) {
   const [phase, setPhase] = useState(0)
+  const [typedCount, setTypedCount] = useState(0)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const onCompleteRef = useRef(onComplete)
+  useEffect(() => { onCompleteRef.current = onComplete }, [onComplete])
 
+  // Phase 0 → 1: initial delay before cursor appears
   useEffect(() => {
-    const timers = [
-      setTimeout(() => setPhase(1), 400),   // star appears
-      setTimeout(() => setPhase(2), 1500),   // star slides left, text revealed
-      setTimeout(() => setPhase(3), 3500),   // 2 s pause → colours invert
-      setTimeout(() => setPhase(4), 4400),   // overlay starts fading out
-      setTimeout(() => {                     // done
-        setPhase(5)
-        onComplete()
-      }, 5400),
-    ]
-    return () => timers.forEach(clearTimeout)
-  }, [onComplete])
+    const t = setTimeout(() => setPhase(1), 2000)
+    return () => clearTimeout(t)
+  }, [])
 
-  if (phase === 5) return null
+  // Typing effect — runs while phase === 1
+  useEffect(() => {
+    if (phase !== 1) return
 
-  const inverted = phase >= 3
+    if (!isDeleting) {
+      // Type forward
+      if (typedCount < WELCOME_TEXT.length) {
+        const t = setTimeout(() => setTypedCount(c => c + 1), 30)
+        return () => clearTimeout(t)
+      } else {
+        // Fully typed — pause then start deleting
+        const t = setTimeout(() => setIsDeleting(true), 1800)
+        return () => clearTimeout(t)
+      }
+    } else {
+      // Delete backward
+      if (typedCount > 0) {
+        const t = setTimeout(() => setTypedCount(c => c - 1), 35)
+        return () => clearTimeout(t)
+      } else {
+        // All deleted → invert
+        setPhase(2)
+      }
+    }
+  }, [phase, typedCount, isDeleting])
+
+  // Phase 2 → 3: bg has inverted, start fading out
+  useEffect(() => {
+    if (phase !== 2) return
+    const t = setTimeout(() => setPhase(3), 1200)
+    return () => clearTimeout(t)
+  }, [phase])
+
+  // Phase 3 → 4: overlay is fading, wait for CSS transition then unmount + complete
+  useEffect(() => {
+    if (phase !== 3) return
+    const t = setTimeout(() => {
+      setPhase(4)
+      onCompleteRef.current()
+    }, 500)
+    return () => clearTimeout(t)
+  }, [phase])
+
+  if (phase === 4) return null
+
+  const inverted = phase >= 2
 
   return (
     <div
@@ -54,49 +93,24 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
         alignItems: 'center',
         justifyContent: 'center',
         transition: 'background-color 0.8s ease, opacity 1s ease',
-        opacity: phase >= 4 ? 0 : 1,
-        pointerEvents: phase >= 4 ? 'none' : 'auto',
+        opacity: phase >= 3 ? 0 : 1,
+        pointerEvents: phase >= 3 ? 'none' : 'auto',
       }}
     >
-      {/* ── "Welcome!" text ── sits behind the star, revealed when star moves */}
       <h1
         className={lunarLocal.className}
         style={{
-          position: 'absolute',
           color: inverted ? '#ffffff' : '#000000',
           fontSize: 'clamp(1rem, 3vw, 1.6rem)',
-          letterSpacing: '0.12em',
-          opacity: phase >= 2 ? 1 : 0,
-          transform: phase >= 2 ? 'scale(1)' : 'scale(0.92)',
-          transition: 'color 0.8s ease, opacity 0.6s ease, transform 0.6s ease',
+          letterSpacing: '0.1em',
+          transition: 'color 0.8s ease',
           userSelect: 'none',
+          whiteSpace: 'nowrap',
         }}
       >
-        Welcome!
+        {phase >= 1 ? WELCOME_TEXT.slice(0, typedCount) : ''}
+        <span className="cursor-blink" style={{ opacity: 1 }}>_</span>
       </h1>
-
-      {/* ── Star image ── centred first, then slides left */}
-      <div
-        style={{
-          position: 'absolute',
-          opacity: phase >= 1 ? 1 : 0,
-          transform:
-            phase >= 2
-              ? 'translateX(min(-18vw, -100px)) scale(0.75)'
-              : 'translateX(0) scale(1)',
-          filter: inverted ? 'none' : 'brightness(0)',
-          transition:
-            'opacity 0.8s ease, transform 1s cubic-bezier(0.4,0,0.2,1), filter 0.8s ease',
-        }}
-      >
-        <Image
-          src="/images/Pixel_Star1.png"
-          alt=""
-          width={48}
-          height={48}
-          priority
-        />
-      </div>
     </div>
   )
 }
