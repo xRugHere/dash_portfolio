@@ -16,7 +16,15 @@ const lunarLocal = localFont({
   4 — Complete → unmount
 */
 
-const WELCOME_TEXT = 'Welcome!'
+
+const random_welcome = [
+  "oh, it's you. hi.",
+  "hello, human :)",
+]
+
+const getRandomWelcome = () => random_welcome[Math.floor(Math.random() * random_welcome.length)]
+
+const WELCOME_TEXT = getRandomWelcome()
 
 interface IntroScreenProps {
   onComplete: () => void
@@ -42,7 +50,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
     if (!isDeleting) {
       // Type forward
       if (typedCount < WELCOME_TEXT.length) {
-        const t = setTimeout(() => setTypedCount(c => c + 1), 30)
+        const t = setTimeout(() => setTypedCount(c => c + 1), 40)
         return () => clearTimeout(t)
       } else {
         // Fully typed — pause then start deleting
@@ -52,7 +60,7 @@ export default function IntroScreen({ onComplete }: IntroScreenProps) {
     } else {
       // Delete backward
       if (typedCount > 0) {
-        const t = setTimeout(() => setTypedCount(c => c - 1), 35)
+        const t = setTimeout(() => setTypedCount(c => c - 1), 20)
         return () => clearTimeout(t)
       } else {
         // All deleted → invert
