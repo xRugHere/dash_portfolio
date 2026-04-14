@@ -58,6 +58,22 @@ html::-webkit-scrollbar {
 /* Terminal cursor blink */
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }
+
+/* Workspace form inputs */
+.ws-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.ws-input:focus { border-color: rgba(255,255,255,0.3); }
+.ws-input::placeholder { color: rgba(255,255,255,0.25); }
+select.ws-input { appearance: auto; }
   50% { opacity: 0; }
 }
 

@@ -43,9 +43,16 @@ export default function PixelArtDisplay({
   const minRotation = -rotationAmount
   const maxRotation = rotationAmount
 
-  // Base size for the pixel art
-  const baseSize = 150
-  const scaledSize = baseSize * imageScale
+  // Responsive sizing: clamp(min, preferred, max)
+  // At scale 1: clamp(5rem, 10vw, 9.375rem) ≈ 80px–150px
+  const minPx = 80 * imageScale
+  const prefVw = 10 * imageScale
+  const maxPx = 150 * imageScale
+
+  const sizeVal = `clamp(${minPx}px, ${prefVw}vw, ${maxPx}px)`
+  const containerHeight = `calc(${sizeVal} + 3rem)`
+  const shadowWidth = `clamp(${(minPx * 1.23).toFixed(1)}px, ${(prefVw * 1.23).toFixed(2)}vw, ${(maxPx * 1.23).toFixed(1)}px)`
+  const shadowHeight = `clamp(${(minPx * 0.2).toFixed(1)}px, ${(prefVw * 0.2).toFixed(2)}vw, ${(maxPx * 0.2).toFixed(1)}px)`
 
   return (
     <section className={`py-12 ${lunarLocal.className}`}>
@@ -59,19 +66,19 @@ export default function PixelArtDisplay({
         <div 
           className="relative flex items-center justify-center" 
           style={{ 
-            width: `${scaledSize}px`, 
-            height: `${scaledSize + 50}px`,
+            width: sizeVal, 
+            height: containerHeight,
             // Prevent layout shift by keeping container stable
-            minWidth: `${scaledSize}px`,
-            minHeight: `${scaledSize + 50}px`
+            minWidth: sizeVal,
+            minHeight: containerHeight,
           }}
         >
           {/* Hover scale wrapper - uses transform instead of changing dimensions */}
           <div 
             className="pixel-hover-scale absolute top-0" 
             style={{ 
-              width: `${scaledSize}px`, 
-              height: `${scaledSize}px`, 
+              width: sizeVal, 
+              height: sizeVal, 
               zIndex: 10, 
               cursor: onClick ? "url('/images/Pointer_Final.png'), pointer" : "url('/images/Pointer_Final.png'), auto",
               // Transform origin at center so scaling doesn't shift layout
@@ -82,8 +89,8 @@ export default function PixelArtDisplay({
             {/* Pixel art object with float animation */}
             <div 
               style={{
-                width: `${scaledSize}px`,
-                height: `${scaledSize}px`,
+                width: sizeVal,
+                height: sizeVal,
                 position: 'relative',
                 animation: `float-up-down-${uniqueId} ${rotationDuration}s ease-in-out infinite`,
                 animationDelay: `${animationDelay}s`,
@@ -95,7 +102,7 @@ export default function PixelArtDisplay({
                     transform: translateY(0px);
                   }
                   50% {
-                    transform: translateY(-15px);
+                    transform: translateY(clamp(-15px, -1vw, -8px));
                   }
                 }
               `}</style>
@@ -139,8 +146,8 @@ export default function PixelArtDisplay({
           <div 
             className="absolute bottom-0 left-1/2 pixel-shadow-animation"
             style={{
-              width: `${scaledSize * 1.23}px`,
-              height: `${scaledSize * 0.2}px`,
+              width: shadowWidth,
+              height: shadowHeight,
               transform: 'translateX(-50%)',
               background: 'radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, transparent 70%)',
               filter: 'blur(5px)',

@@ -13,6 +13,8 @@ import { useEffect, useState, useCallback } from 'react'
 import SectionPage from '../../components/SectionPage'
 import { useSection } from '../../components/SectionContext'
 import IntroScreen from '../../components/IntroScreen'
+import WelcomeCard from '../../components/WelcomeCard'
+import CurrentStatusSection from '../../components/CurrentStatusSection'
 
 const lunarLocal = localFont({
   src: [{ path: '../../public/fonts/PixelFont.ttf', weight: '400', style: 'normal' }],
@@ -21,13 +23,18 @@ const lunarLocal = localFont({
 /* ════════════════════════════════════════════════════════════════════════
    SPACE THEME — dashboard, intro, language icons, nav, portal, socials
    ════════════════════════════════════════════════════════════════════ */
-function SpaceThemeLayout() {
+function SpaceThemeLayout({ contentReady }: { contentReady: boolean }) {
   const { switchSection } = useSection()
   const { setWarpXY, setWarpZ } = useTheme()
 
   return (
     <>
-      <LiveStatsRibbon />
+      {/* <LiveStatsRibbon /> */}
+      <WelcomeCard visible={contentReady} />
+
+      <ScrollFadeIn delay={400}>
+        <CurrentStatusSection />
+      </ScrollFadeIn>
 
       <div className="pt-24 pb-16">
         {/* Programming language icons */}
@@ -275,7 +282,7 @@ export default function Home() {
         }}
       >
         <SectionPage section="main">
-          <SpaceThemeLayout />
+          <SpaceThemeLayout contentReady={contentReady} />
         </SectionPage>
 
         <SectionPage section="projects">
