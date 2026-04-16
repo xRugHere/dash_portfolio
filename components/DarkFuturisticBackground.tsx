@@ -223,7 +223,7 @@ export default function DarkFuturisticBackground() {
                   }}
                 >
                   <Image
-                    src="/images/star1.png"
+                    src="/images/spaceBackgroundObjects/star1.png"
                     alt=""
                     fill
                     className="object-contain"

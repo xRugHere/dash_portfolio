@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
 export default function CommissionsPage() {
-  const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
   const [queueCount, setQueueCount] = useState(0)
@@ -15,15 +14,19 @@ export default function CommissionsPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('commissions').select('*').limit(1).single()
-      if (data) {
-        setHasData(true)
-        setIsOpen(data.is_open ?? false)
-        setQueueCount(data.queue_count ?? 0)
-        setPricingNotes(data.pricing_notes ?? '')
-        setResponseTime(data.response_time ?? '')
-        setStatusMessage(data.status_message ?? '')
-      }
+      if (!isSupabaseConfigured) { setLoading(false); return }
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from('commissions').select('*').limit(1).single()
+        if (data) {
+          setHasData(true)
+          setIsOpen(data.is_open ?? false)
+          setQueueCount(data.queue_count ?? 0)
+          setPricingNotes(data.pricing_notes ?? '')
+          setResponseTime(data.response_time ?? '')
+          setStatusMessage(data.status_message ?? '')
+        }
+      } catch { /* Supabase not available */ }
       setLoading(false)
     }
     load()

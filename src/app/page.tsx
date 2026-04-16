@@ -130,7 +130,7 @@ function EarthThemeLayout() {
               thumbnail="/videos/MainMenuShowcase.mp4"
               description="A fun and engaging rock skipping minigame framework that works with PC, console, mobile, and VR. Features realistic physics, customizable rocks, multiple game modes, and an intuitive control system designed for all platforms."
               secondDescription="SKIP - all platforms"
-              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/buildGIF1.gif', '/images/robloxPixelImage.png']}
+              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/BuildGIF1.gif', '/images/robloxPixelImage.png']}
               date="June 2025"
               features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
             />
@@ -141,7 +141,7 @@ function EarthThemeLayout() {
               thumbnail="/videos/CardViewerShowcase1.mp4"
               description="A combination of UI and backend systems that allow players to collect, view, and manage a collection of cards within a game. Features include dynamic card rendering, sorting/filtering options, and integration with in-game rewards."
               secondDescription="SKIP - all platforms"
-              images={['/videos/CardVeiwerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
+              images={['/videos/CardViewerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
               date="June 2025"
               features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
             />
@@ -194,7 +194,7 @@ function ProjectViewLayout() {
               thumbnail="/videos/MainMenuShowcase.mp4"
               description="A fun and engaging rock skipping minigame framework that works with PC, console, mobile, and VR. Features realistic physics, customizable rocks, multiple game modes, and an intuitive control system designed for all platforms."
               secondDescription="SKIP - all platforms"
-              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/buildGIF1.gif', '/images/robloxPixelImage.png']}
+              images={['/images/RockCustomizer.png', '/images/codeThumbnail2.jpg', '/images/BuildGIF1.gif', '/images/robloxPixelImage.png']}
               date="June 2025"
               features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
             />
@@ -205,7 +205,7 @@ function ProjectViewLayout() {
               thumbnail="/videos/CardViewerShowcase1.mp4"
               description="A combination of UI and backend systems that allow players to collect, view, and manage a collection of cards within a game. Features include dynamic card rendering, sorting/filtering options, and integration with in-game rewards."
               secondDescription="SKIP - all platforms"
-              images={['/videos/CardVeiwerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
+              images={['/videos/CardViewerShowcase1.mp4', '/videos/CardGameShowcase.mp4', '/images/CardShopShowcase1.png', '/images/CardDisplay1.png']}
               date="June 2025"
               features={['Available on all platforms (mobile, console, pc, vr)', 'Customizable rock decorations', 'Power and angle control', 'Explore and Race modes', 'Strict anti-cheat']}
             />

@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 
 export default function BlogPostReader() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const supabase = createClient()
 
   const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
@@ -17,21 +16,27 @@ export default function BlogPostReader() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', id)
-        .eq('published', true)
-        .single()
-      if (!data) {
+      if (!isSupabaseConfigured) { router.push('/workspace/blog'); return }
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('id', id)
+          .eq('published', true)
+          .single()
+        if (!data) {
+          router.push('/workspace/blog')
+          return
+        }
+        setTitle(data.title ?? '')
+        setContent(data.content ?? '')
+        setTags(data.tags ?? [])
+        setCreatedAt(data.created_at ?? '')
+        setLoading(false)
+      } catch {
         router.push('/workspace/blog')
-        return
       }
-      setTitle(data.title ?? '')
-      setContent(data.content ?? '')
-      setTags(data.tags ?? [])
-      setCreatedAt(data.created_at ?? '')
-      setLoading(false)
     }
     load()
   }, [id]) // eslint-disable-line react-hooks/exhaustive-deps

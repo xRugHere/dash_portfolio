@@ -1,23 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import Link from 'next/link'
 import type { BlogPost } from '@/lib/types'
 
 export default function BlogList() {
-  const supabase = createClient()
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .order('created_at', { ascending: false })
-      setPosts(data ?? [])
+      if (!isSupabaseConfigured) { setLoading(false); return }
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false })
+        setPosts(data ?? [])
+      } catch { /* Supabase not available */ }
       setLoading(false)
     }
     load()

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { ActivityEntry } from '@/lib/types'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -12,18 +12,21 @@ const TYPE_COLORS: Record<string, string> = {
 }
 
 export default function ActivityPage() {
-  const supabase = createClient()
   const [entries, setEntries] = useState<ActivityEntry[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase
-        .from('activity_log')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
-      setEntries(data ?? [])
+      if (!isSupabaseConfigured) { setLoading(false); return }
+      try {
+        const supabase = createClient()
+        const { data } = await supabase
+          .from('activity_log')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50)
+        setEntries(data ?? [])
+      } catch { /* Supabase not available */ }
       setLoading(false)
     }
     load()

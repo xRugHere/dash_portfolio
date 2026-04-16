@@ -30,12 +30,12 @@ const OBJECTS: LayerObjectDef[] = [
     rotationAnimation: { minDegrees: -10, maxDegrees: 0, duration: 6 },
     zVariants: [
       { above: 33, src: '/images/spaceBackgroundObjects/Planet10_.png' },
-      { above: 66, src: '/images/spaceBackgroundObjects/Planet10_large.png' },
+      { above: 66, src: '/images/spaceBackgroundObjects/Planet10.png' },
     ],
   },
   {
     id: 'planet-redgreen',
-    src: '/images/spaceBackgroundObjects/Planet_RedGreen_Final1.png',
+    src: '/images/spaceBackgroundObjects/Planet_RedGreen_FInal1.png',
     layer: 0,
     x: 93,
     y: 100,
@@ -65,7 +65,7 @@ const OBJECTS: LayerObjectDef[] = [
   },
   {
     id: 'spaceman',
-    src: '/images/spaceBackgroundObjects/SpaceMan.png',
+    src: '/images/spaceBackgroundObjects/Spaceman.png',
     layer: 2,
     x: -4,
     y: 60,

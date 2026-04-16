@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { CurrentProject } from '@/lib/types'
 
 const STATUS_LABEL: Record<string, string> = {
@@ -9,7 +9,6 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function ProjectPage() {
-  const supabase = createClient()
   const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -23,18 +22,22 @@ export default function ProjectPage() {
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('current_project').select('*').limit(1).single()
-      if (data) {
-        setHasData(true)
-        setTitle(data.title ?? '')
-        setDescription(data.description ?? '')
-        setStatus(data.status ?? 'planning')
-        setProgress(data.progress ?? 0)
-        setTechStack((data.tech_stack ?? []).join(', '))
-        setRepoUrl(data.repo_url ?? '')
-        setStartedAt(data.started_at ?? '')
-        setExpectedCompletion(data.expected_completion ?? '')
-      }
+      if (!isSupabaseConfigured) { setLoading(false); return }
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.from('current_project').select('*').limit(1).single()
+        if (data) {
+          setHasData(true)
+          setTitle(data.title ?? '')
+          setDescription(data.description ?? '')
+          setStatus(data.status ?? 'planning')
+          setProgress(data.progress ?? 0)
+          setTechStack((data.tech_stack ?? []).join(', '))
+          setRepoUrl(data.repo_url ?? '')
+          setStartedAt(data.started_at ?? '')
+          setExpectedCompletion(data.expected_completion ?? '')
+        }
+      } catch { /* Supabase not available */ }
       setLoading(false)
     }
     load()

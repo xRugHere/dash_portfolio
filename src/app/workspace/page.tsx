@@ -1,13 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import Link from 'next/link'
 import type { CurrentProject, CommissionStatus } from '@/lib/types'
 import WeatherStrip from '../../../components/WeatherStrip'
 
 export default function WorkspaceDashboard() {
-  const supabase = createClient()
   const [project, setProject] = useState<CurrentProject | null>(null)
   const [commission, setCommission] = useState<CommissionStatus | null>(null)
   const [activityCount, setActivityCount] = useState(0)
@@ -16,17 +15,26 @@ export default function WorkspaceDashboard() {
 
   useEffect(() => {
     async function load() {
-      const [projectRes, commRes, actRes, blogRes] = await Promise.all([
-        supabase.from('current_project').select('*').limit(1).single(),
-        supabase.from('commissions').select('*').limit(1).single(),
-        supabase.from('activity_log').select('id', { count: 'exact', head: true }),
-        supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('published', true),
-      ])
+      if (!isSupabaseConfigured) {
+        setLoading(false)
+        return
+      }
+      try {
+        const supabase = createClient()
+        const [projectRes, commRes, actRes, blogRes] = await Promise.all([
+          supabase.from('current_project').select('*').limit(1).single(),
+          supabase.from('commissions').select('*').limit(1).single(),
+          supabase.from('activity_log').select('id', { count: 'exact', head: true }),
+          supabase.from('blog_posts').select('id', { count: 'exact', head: true }).eq('published', true),
+        ])
 
-      if (projectRes.data) setProject(projectRes.data)
-      if (commRes.data) setCommission(commRes.data)
-      setActivityCount(actRes.count ?? 0)
-      setBlogCount(blogRes.count ?? 0)
+        if (projectRes.data) setProject(projectRes.data)
+        if (commRes.data) setCommission(commRes.data)
+        setActivityCount(actRes.count ?? 0)
+        setBlogCount(blogRes.count ?? 0)
+      } catch {
+        // Supabase queries failed — leave defaults
+      }
       setLoading(false)
     }
     load()
