@@ -4,7 +4,7 @@ export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  if (!url || !key || url === 'your-supabase-url') {
+  if (!url || !key || url === 'https://xrcolqrxxprffvunqwnh.supabase.co') {
     // Return a dummy client during build / when not configured
     return createBrowserClient('https://placeholder.supabase.co', 'placeholder')
   }

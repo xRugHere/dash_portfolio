@@ -6,7 +6,7 @@ export async function updateSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   // If Supabase isn't configured, just pass through
-  if (!url || !key || url === 'your-supabase-url') {
+  if (!url || !key || url === 'https://xrcolqrxxprffvunqwnh.supabase.co') {
     return NextResponse.next({ request })
   }
 
