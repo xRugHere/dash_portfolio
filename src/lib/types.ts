@@ -5,6 +5,7 @@ export interface CurrentProject {
   status: 'planning' | 'in-progress' | 'testing' | 'completed'
   progress: number
   tech_stack: string[]
+  images: string[]
   repo_url: string | null
   started_at: string | null
   expected_completion: string | null

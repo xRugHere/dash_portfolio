@@ -4,7 +4,7 @@ const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 export const isSupabaseConfigured =
-  !!url && !!key && url !== 'https://xrcolqrxxprffvunqwnh.supabase.co'
+  !!url && !!key
 
 export function createClient() {
   if (!isSupabaseConfigured) {

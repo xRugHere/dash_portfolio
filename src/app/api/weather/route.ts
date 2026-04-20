@@ -9,6 +9,18 @@ interface WeatherCache {
   timestamp: number
 }
 
+interface HourlyPeriod {
+  startTime: string
+  temperature: number
+  temperatureUnit: string
+  shortForecast: string
+  isDaytime: boolean
+  windSpeed: string
+  windDirection: string
+  relativeHumidity: number | null
+  probabilityOfPrecipitation: number | null
+}
+
 interface WeatherData {
   current: {
     temperature: number
@@ -25,6 +37,7 @@ interface WeatherData {
     shortForecast: string
     isDaytime: boolean
   }[]
+  hourly: HourlyPeriod[]
   location: string
 }
 
@@ -101,6 +114,20 @@ export async function GET() {
       }
     }
 
+    // Step 4: Get hourly forecast (next 10 hours)
+    const hourlyData = await fetchNWS(
+      `https://api.weather.gov/gridpoints/${gridId}/${gridX},${gridY}/forecast/hourly`
+    )
+    // Filter out periods whose hour has already passed, then take 10
+    const now = new Date()
+    const allHourly = (hourlyData.properties?.periods ?? []) as Record<string, unknown>[]
+    const currentHourly = allHourly.filter((p) => {
+      const start = new Date(p.startTime as string)
+      // Each period covers 1 hour; keep it if its end (start + 1hr) is still in the future
+      return start.getTime() + 3600000 > now.getTime()
+    })
+    const hourlyPeriods = currentHourly.slice(0, 10)
+
     const result: WeatherData = {
       current,
       forecast: periods.map((p: Record<string, unknown>) => ({
@@ -109,6 +136,21 @@ export async function GET() {
         unit: (p.temperatureUnit as string) || 'F',
         shortForecast: p.shortForecast as string,
         isDaytime: p.isDaytime as boolean,
+      })),
+      hourly: hourlyPeriods.map((p: Record<string, unknown>) => ({
+        startTime: p.startTime as string,
+        temperature: p.temperature as number,
+        temperatureUnit: (p.temperatureUnit as string) || 'F',
+        shortForecast: p.shortForecast as string,
+        isDaytime: p.isDaytime as boolean,
+        windSpeed: p.windSpeed as string,
+        windDirection: p.windDirection as string,
+        relativeHumidity: (p.relativeHumidity as { value?: number })?.value != null
+          ? Math.round((p.relativeHumidity as { value: number }).value)
+          : null,
+        probabilityOfPrecipitation: (p.probabilityOfPrecipitation as { value?: number })?.value != null
+          ? (p.probabilityOfPrecipitation as { value: number }).value
+          : null,
       })),
       location: locationName,
     }

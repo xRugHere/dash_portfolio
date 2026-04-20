@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import localFont from 'next/font/local'
+import ParallaxWindow from './ParallaxWindow'
+import type { ParallaxLayer } from './ParallaxWindow'
 
 const lunarLocal = localFont({
   src: [{ path: '../public/fonts/PixelFont.ttf', weight: '400', style: 'normal' }],
@@ -9,6 +11,30 @@ const lunarLocal = localFont({
 
 const WELCOME_TEXT = "Welcome!"
 const DESCRIPTION_TEXT = "Hello! I'm a computer science student who loves building and learning anything new I can get my hands on. take a look around!"
+
+const PARALLAX_LAYERS: ParallaxLayer[] = [
+  // Layer 1 — furthest back, moves the most
+  {
+    depth: 1.5,
+    images: [
+      { src: '/images/TestPixelObject1.png', x: '50%', y: '50%', width: 48, height: 48 }
+    ],
+  },
+  // Layer 2 — middle
+  {
+    depth: 1,
+    images: [
+      { src: '/images/TestPixelObject1.png', x: '50%', y: '50%', width: 60, height: 60 },
+    ],
+  },
+  // Layer 3 — closest, moves the least
+  {
+    depth: 0.5,
+    images: [
+      { src: '/images/TestPixelObject1.png', x: '50%', y: '50%', width: 72, height: 72 },
+    ],
+  },
+]
 
 interface WelcomeCardProps {
   /** Set to true once the parent content wrapper is visible so animations start on cue */
@@ -76,7 +102,7 @@ export default function WelcomeCard({ visible = false }: WelcomeCardProps) {
           </div>
         </div>
 
-        {/* Right side placeholder — hidden on mobile */}
+        {/* Right side — 3D parallax window, hidden on mobile */}
         <div
           className="hidden md:flex flex-1 items-center justify-center min-h-[180px] transition-all duration-1000 ease-out"
           style={{
@@ -84,10 +110,7 @@ export default function WelcomeCard({ visible = false }: WelcomeCardProps) {
             transform: showPlaceholder ? 'translateY(0)' : 'translateY(24px)',
           }}
         >
-          {/* Placeholder — swap this out later */}
-          <div className="w-full h-full border border-white/10 border-dashed rounded flex items-center justify-center">
-            <span className={`text-gray-600 text-[.55rem] ${lunarLocal.className}`}>[ placeholder ]</span>
-          </div>
+          <ParallaxWindow layers={PARALLAX_LAYERS} windowHeight='30vh' windowWidth='30vw'/>
         </div>
       </div>
     </div>
